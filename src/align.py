@@ -17,7 +17,21 @@ def get_edits(p: str, q: str) -> tuple[str, str, str]:
     """
     assert len(p) == len(q)
     # FIXME: do the actual calculations here
-    return '', '', ''
+    orig, trans, cigar = "","",""
+
+    for i in range(len(p)):
+        if p[i] != "-" and q[i] != "-":
+            orig += f"{p[i]}"
+            trans += f"{q[i]}"
+            cigar += f"M"
+        elif p[i] == "-" and q[i] != "-":
+            trans += f"{q[i]}"
+            cigar += f"I"
+        elif p[i] != "-" and q[i] == "-":
+            orig += f"{p[i]}"
+            cigar += f"D"
+
+    return orig, trans, cigar
 
 
 def local_align(p: str, x: str, i: int, edits: str) -> tuple[str, str]:
@@ -37,7 +51,7 @@ def local_align(p: str, x: str, i: int, edits: str) -> tuple[str, str]:
 
     """
     # FIXME: Compute the alignment rows
-    return '', ''
+    return align(p, x[i:], edits)
 
 
 def align(p: str, q: str, edits: str) -> tuple[str, str]:
@@ -56,7 +70,22 @@ def align(p: str, q: str, edits: str) -> tuple[str, str]:
 
     """
     # FIXME: Compute the alignment rows
-    return '', ''
+    orig = ""
+    trans = ""
+    pCounter, qCounter = 0 , 0
+    for i in edits:
+        if i == "M":
+            orig += f"{p[pCounter]}"; pCounter += 1
+            trans += f"{q[qCounter]}"; qCounter += 1
+        elif i == "D":
+            orig += f"{p[pCounter]}"; pCounter += 1
+            trans += f"-"
+        elif i == "I":
+            orig += f"-"
+            trans += f"{q[qCounter]}"; qCounter += 1
+
+
+    return orig, trans
 
 
 def edit_dist(p: str, x: str, i: int, edits: str) -> int:
@@ -76,4 +105,14 @@ def edit_dist(p: str, x: str, i: int, edits: str) -> int:
     5
     """
     # FIXME: Compute the edit distance
-    return -1
+    distance = 0
+    firstRow, secondRow = local_align(p, x, i, edits)
+    firstCounter, secondCounter = 0,0
+    for k in range(len(edits)):
+        if edits[k] == "D" or edits[k] == "I":
+            distance += 1
+        else:
+            if not firstRow[k] == secondRow[k]:
+                distance += 1
+
+    return distance
