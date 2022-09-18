@@ -38,7 +38,11 @@ def cigar_to_edits(cigar: str) -> str:
 
     """
     # FIXME: construct the edits sequence
-    return ""
+    edits = ""
+    pairs = split_pairs(cigar)
+    for pair in pairs:
+        edits += pair[0] * pair[1]
+    return edits
 
 
 def split_blocks(x: str) -> list[str]:
@@ -74,4 +78,8 @@ def edits_to_cigar(edits: str) -> str:
 
     """
     # FIXME: Compute the cigar
-    return ''
+    cigar = ""
+    blocks = split_blocks(edits)
+    for block in blocks:
+        cigar += str(len(block)) + block[0]
+    return cigar
